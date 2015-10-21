@@ -11,8 +11,6 @@ import org.dspace.content.DSpaceObject;
 import org.dspace.content.InProgressSubmission;
 import org.dspace.content.WorkspaceItem;
 import org.dspace.content.service.*;
-import org.dspace.core.Constants;
-import org.dspace.eperson.factory.EPersonServiceFactory;
 import org.dspace.utils.DSpace;
 import org.dspace.workflow.factory.WorkflowServiceFactory;
 

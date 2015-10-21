@@ -7,19 +7,12 @@
  */
 package org.dspace.authorize;
 
-import java.sql.SQLException;
-import java.util.*;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dspace.authorize.service.AuthorizeService;
 import org.dspace.authorize.service.ResourcePolicyService;
-import org.dspace.content.Bitstream;
-import org.dspace.content.Bundle;
+import org.dspace.content.*;
 import org.dspace.content.Collection;
-import org.dspace.content.Community;
-import org.dspace.content.DSpaceObject;
-import org.dspace.content.Item;
 import org.dspace.content.factory.ContentServiceFactory;
 import org.dspace.content.service.BitstreamService;
 import org.dspace.content.service.WorkspaceItemService;
@@ -30,6 +23,9 @@ import org.dspace.eperson.Group;
 import org.dspace.eperson.service.GroupService;
 import org.dspace.workflow.WorkflowItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * AuthorizeManager handles all authorization checks for DSpace. For better
@@ -722,6 +718,59 @@ public class AuthorizeServiceImpl implements AuthorizeService
         policy.setRpName(name);
         policy.setRpDescription(reason);
         return policy;
+    }
+
+    @Override
+    public void addPolicyOnce(Context context, DSpaceObject dSpaceObject, int action, Group group) throws AuthorizeException, SQLException {
+        boolean present = groupActionCheck(context, dSpaceObject, action, group);
+        if (!present) {
+            addPolicy(context, dSpaceObject, action, group);
+        }
+    }
+
+    @Override
+    public void addPolicyOnce(Context context, DSpaceObject dSpaceObject, int action, Group group, Date startDate) throws SQLException, AuthorizeException {
+        boolean present = false;
+        List<ResourcePolicy> policiesForGroup = getPoliciesForGroup(context, group);
+        for (ResourcePolicy resourcePolicy : policiesForGroup) {
+            if (resourcePolicy.getdSpaceObject() != null && dSpaceObject!=null && dSpaceObject.getType() == resourcePolicy.getdSpaceObject().getType()
+                    && resourcePolicy.getdSpaceObject().getID() == dSpaceObject.getID()
+                    && resourcePolicy.getAction() == action
+                    && ((resourcePolicy.getStartDate()==null && startDate==null)
+                    || (resourcePolicy.getStartDate()!=null && resourcePolicy.getStartDate().equals(startDate)))) {
+                present = true;
+            }
+        }
+        if (!present) {
+            ResourcePolicy resourcePolicy = resourcePolicyService.create(context);
+            resourcePolicy.setdSpaceObject(dSpaceObject);
+            resourcePolicy.setAction(action);
+            resourcePolicy.setGroup(group);
+            resourcePolicy.setRpType(null);
+            resourcePolicy.setStartDate(startDate);
+            resourcePolicyService.update(context,resourcePolicy);
+            serviceFactory.getDSpaceObjectService(dSpaceObject).updateLastModified(context,dSpaceObject);
+        }
+    }
+
+    @Override
+    public boolean groupActionCheck(Context context, DSpaceObject dSpaceObject, int action, Group group) throws SQLException {
+        List<ResourcePolicy> policiesForGroup = getPoliciesForGroup(context, group);
+        return resourceAndActionCheck(dSpaceObject, action, policiesForGroup);
+    }
+
+    @Override
+    public boolean resourceAndActionCheck(DSpaceObject dSpaceObject, int action, List<ResourcePolicy> policies) {
+        boolean present = false;
+        for (ResourcePolicy resourcePolicy : policies) {
+
+            if (resourcePolicy.getdSpaceObject() != null && dSpaceObject.getType() == resourcePolicy.getdSpaceObject().getType()
+                    && resourcePolicy.getdSpaceObject().getID().equals(dSpaceObject.getID())
+                    && resourcePolicy.getAction() == action) {
+                present = true;
+            }
+        }
+        return present;
     }
 
 }

@@ -7,23 +7,15 @@
  */
 package org.dspace.app.xmlui.aspect.administrative.item;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.UUID;
-
+import org.dspace.app.xmlui.aspect.administrative.plugins.EditBitstreamFormAddition;
+import org.dspace.app.xmlui.aspect.administrative.plugins.EditBitstreamFormAdditionsManager;
 import org.dspace.app.xmlui.aspect.submission.submit.AccessStepUtil;
 import org.dspace.app.xmlui.cocoon.AbstractDSpaceTransformer;
 import org.dspace.app.xmlui.utils.UIException;
 import org.dspace.app.xmlui.wing.Message;
 import org.dspace.app.xmlui.wing.WingException;
-import org.dspace.app.xmlui.wing.element.Body;
-import org.dspace.app.xmlui.wing.element.Division;
-import org.dspace.app.xmlui.wing.element.List;
-import org.dspace.app.xmlui.wing.element.PageMeta;
-import org.dspace.app.xmlui.wing.element.Select;
-import org.dspace.app.xmlui.wing.element.Text;
+import org.dspace.app.xmlui.wing.element.*;
 import org.dspace.authorize.AuthorizeException;
-import org.dspace.authorize.AuthorizeServiceImpl;
 import org.dspace.authorize.factory.AuthorizeServiceFactory;
 import org.dspace.authorize.service.AuthorizeService;
 import org.dspace.content.Bitstream;
@@ -33,7 +25,12 @@ import org.dspace.content.factory.ContentServiceFactory;
 import org.dspace.content.service.BitstreamFormatService;
 import org.dspace.content.service.BitstreamService;
 import org.dspace.core.ConfigurationManager;
+import org.dspace.core.Constants;
 import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.UUID;
 
 /**
  * 
@@ -141,6 +138,11 @@ public class EditBitstreamForm extends AbstractDSpaceTransformer
 		description.setLabel(T_description_label);
 		description.setHelp(T_description_help);
 		description.setValue(bitstream.getDescription());
+
+		EditBitstreamFormAddition editFormAddition = EditBitstreamFormAdditionsManager.getInstance().findeditBitstreamFormAddition(Constants.BITSTREAM,"file_access");
+		if( editFormAddition!=null){
+			editFormAddition.addBodyHook(context, bitstream, edit);
+		}
 
         // EMBARGO FIELD
         // if AdvancedAccessPolicy=false: add Embargo Fields.

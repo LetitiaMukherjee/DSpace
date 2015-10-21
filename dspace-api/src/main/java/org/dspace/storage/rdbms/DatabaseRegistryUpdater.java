@@ -7,9 +7,6 @@
  */
 package org.dspace.storage.rdbms;
 
-import java.io.File;
-import java.sql.Connection;
-
 import org.dspace.administer.MetadataImporter;
 import org.dspace.administer.RegistryLoader;
 import org.dspace.core.ConfigurationManager;
@@ -18,6 +15,9 @@ import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.callback.FlywayCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.sql.Connection;
 
 /**
  * This is a FlywayCallback class which automatically updates the
@@ -64,6 +64,7 @@ public class DatabaseRegistryUpdater implements FlywayCallback
             MetadataImporter.loadRegistry(base + "dcterms-types.xml", true);
             MetadataImporter.loadRegistry(base + "eperson-types.xml", true);
             MetadataImporter.loadRegistry(base + "sword-metadata.xml", true);
+            MetadataImporter.loadRegistry(base + "elsevier-types.xml", true);
 
             // Check if XML Workflow is enabled in workflow.cfg
             if (ConfigurationManager.getProperty("workflow", "workflow.framework").equals("xmlworkflow"))
