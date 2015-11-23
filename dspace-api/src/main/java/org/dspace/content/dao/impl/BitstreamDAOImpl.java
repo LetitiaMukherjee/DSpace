@@ -77,7 +77,8 @@ public class BitstreamDAOImpl extends AbstractHibernateDSODAO<Bitstream> impleme
     public Iterator<Bitstream> findByCommunity(Context context, Community community) throws SQLException {
         Query query = createQuery(context, "select b from Bitstream b " +
                 "join b.bundles bitBundles " +
-                "join bitBundles.items item " +
+                "join bitBundles.bundle bundle " +
+                "join bundle.items item " +
                 "join item.collections itemColl " +
                 "join itemColl.communities community " +
                 "WHERE :community IN community");
@@ -91,7 +92,8 @@ public class BitstreamDAOImpl extends AbstractHibernateDSODAO<Bitstream> impleme
     public Iterator<Bitstream> findByCollection(Context context, Collection collection) throws SQLException {
         Query query = createQuery(context, "select b from Bitstream b " +
                 "join b.bundles bitBundles " +
-                "join bitBundles.items item " +
+                "join bitBundles.bundle bundle " +
+                "join bundle.items item " +
                 "join item.collections c " +
                 "WHERE :collection IN c");
 
@@ -104,7 +106,8 @@ public class BitstreamDAOImpl extends AbstractHibernateDSODAO<Bitstream> impleme
     public Iterator<Bitstream> findByItem(Context context, Item item) throws SQLException {
         Query query = createQuery(context, "select b from Bitstream b " +
                 "join b.bundles bitBundles " +
-                "join bitBundles.items item " +
+                "join bitBundles.bundle bundle " +
+                "join bundle.items item " +
                 "WHERE :item IN item");
 
         query.setParameter("item", item);
